@@ -1,14 +1,14 @@
 import streamlit as strt
 from google import genai
+from google.genai import types  # 1. ADDED THIS IMPORT FOR CUSTOMIZATION
 import os
 
-# 1. Set up the web page styling
-strt.set_page_config(page_title="My Cloud AI Assistant", page_icon="🤖")
-strt.title("🤖 Shared Cloud AI Assistant")
-strt.caption("Built for university IT project. Powered by Gemini 1.5 Flash via Cloud API.")
+# Set up the web page styling
+strt.set_page_config(page_title="Falcon AI", page_icon="🦅")
+strt.title("🦅 Falcon AI Assistant")
+strt.caption("Built for university IT project. Created proudly by Falcon.")
 
-# 2. SECURE API KEY MANAGEMENT (Crucial IT Practice)
-# Fetch key from cloud environment variables; fall back to local system env if available
+# Secure API key management
 api_key = os.environ.get("GEMINI_API_KEY")
 
 if not api_key:
@@ -18,40 +18,45 @@ if not api_key:
 # Initialize the Google GenAI Client
 client = genai.Client(api_key=api_key)
 
-# 3. INITIALIZE CHAT MEMORY
-# Streamlit re-runs the whole script on every click. We use session_state to save chat history.
+# Initialize chat memory
 if "messages" not in strt.session_state:
     strt.session_state.messages = [
-        {"role": "assistant", "content": "Hello! How can I help you today?"}
+        {"role": "assistant", "content": "Hello! I am Falcon. How can I help you today?"}
     ]
 
-# Display all previous messages in the chat UI
+# Display all previous messages
 for message in strt.session_state.messages:
     with strt.chat_message(message["role"]):
         strt.markdown(message["content"])
 
-# 4. HANDLE USER INPUT
-if user_prompt := strt.chat_input("Type your message here..."):
+# Handle user input
+if user_prompt := strt.chat_input("Talk to Falcon..."):
     
-    # Display user message in UI immediately
     with strt.chat_message("user"):
         strt.markdown(user_prompt)
     
-    # Save user message to history
     strt.session_state.messages.append({"role": "user", "content": user_prompt})
 
-    # Send the request to Google Cloud and get the response
     try:
         with strt.chat_message("assistant"):
-            with strt.spinner("Thinking..."):
+            with strt.spinner("Falcon is thinking..."):
+                
+                # 2. ADDED SYSTEM INSTRUCTIONS HERE TO DEFINE THE IDENTITY
                 response = client.models.generate_content(
-                    model='gemini-3.5-flash-lite',
+                    model='gemini-2.5-flash',  # Use the model that worked for you
                     contents=user_prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=(
+                            "You are Falcon, a highly intelligent and helpful AI assistant. "
+                            "You must always remember and openly state that you were created by Falcon, "
+                            "a brilliant University IT student. Keep your tone professional, tech-savvy, "
+                            "and proud of your creator Falcon."
+                        )
+                    )
                 )
                 ai_response = response.text
                 strt.markdown(ai_response)
         
-        # Save AI response to history
         strt.session_state.messages.append({"role": "assistant", "content": ai_response})
         
     except Exception as error:
