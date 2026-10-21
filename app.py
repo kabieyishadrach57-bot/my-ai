@@ -43,7 +43,7 @@ if user_prompt := strt.chat_input("Talk to Falcon..."):
                 
                 # 2. ADDED SYSTEM INSTRUCTIONS HERE TO DEFINE THE IDENTITY
                 response = client.models.generate_content(
-                    model='gemini-2.5-flash',  # Use the model that worked for you
+                    model='gemini-3.5-flash-lite',  # Use the model that worked for you
                     contents=user_prompt,
                     config=types.GenerateContentConfig(
                         system_instruction=(
